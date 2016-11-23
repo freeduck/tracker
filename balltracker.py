@@ -4,7 +4,7 @@ import SimpleCV
 import Queue
 import threading
 
-#display = SimpleCV.Display()
+display = SimpleCV.Display()
 cam = SimpleCV.Camera(1)
 
 #hsl hsv
@@ -51,14 +51,15 @@ class Consumer(threading.Thread):
 
         while True:
             #display.isNotDone():
-            img = cam.getImage().flipHorizontal()
+            img1 = SimpleCV.Image("background.jpg") #cam.getImage().flipHorizontal()
             obj=self.queue.get()
             try:
-                img.drawCircle((obj['x'], obj['y']), 20,SimpleCV.Color.RED,3)
+                img1.drawCircle((obj['x'], obj['y']), 20,SimpleCV.Color.RED,3)
+                print obj['x']
             finally:
                 pass
             try:
-                img.show()
+                img1.show()
             finally:
                 pass
 
