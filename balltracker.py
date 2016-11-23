@@ -2,15 +2,16 @@ print __doc__
 
 import SimpleCV
 import Queue
-import threading
+from threading import Thread, Lock
 
 #display = SimpleCV.Display()
-cam = SimpleCV.Camera(1)
+cam = SimpleCV.Camera(0)
+cameraMutex = Lock()
 
 #hsl hsv
-class Producer(threading.Thread):
+class Producer(Thread):
     def __init__(self, queue):
-        threading.Thread.__init__(self)
+        Thread.__init__(self)
         self.queue = queue
         print 'init producer'
 
@@ -20,7 +21,7 @@ class Producer(threading.Thread):
         lasty=0
         while True:
             #display.isNotDone():
-            img = cam.getImage().flipHorizontal()
+            img = withScene(lambda : cam.getImage().flipHorizontal())
             dist = img.colorDistance(SimpleCV.Color.BLACK).dilate(2)
             segmented = dist.stretch(200,255)
             blobs = segmented.findBlobs()
@@ -34,15 +35,15 @@ class Producer(threading.Thread):
                         lasty=circle.y
                         #self.queue.put({'x': circle.x, 'y':circle.y, 'radius': circle.radius, 'image': img})
 
-            self.queue.put({'x': lastx, 'y':lasty})
+            self.queue.put({'x': lastx, 'y':lasty, 'cam': cam})
 
 
             #img.show()
 
 
-class Consumer(threading.Thread):
+class Consumer(Thread):
     def __init__(self, queue):
-        threading.Thread.__init__(self)
+        Thread.__init__(self)
         self.queue = queue
         print 'init Consumer'
 
@@ -51,14 +52,14 @@ class Consumer(threading.Thread):
 
         while True:
             #display.isNotDone():
-            img = cam.getImage().flipHorizontal()
             obj=self.queue.get()
+            img = withScene(lambda : cam.getImage().flipHorizontal())
             try:
                 img.drawCircle((obj['x'], obj['y']), 20,SimpleCV.Color.RED,3)
             finally:
                 pass
             try:
-                img.show()
+                withScene(lambda : img.show())
             finally:
                 pass
 
@@ -75,4 +76,10 @@ def main():
     producer.join()
     consumer.join()
 
+
+def withScene(todo):
+    cameraMutex.acquire()
+    result = todo()
+    cameraMutex.release()
+    return result
 main()
