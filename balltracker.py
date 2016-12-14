@@ -34,7 +34,7 @@ class Producer(Thread):
                         lasty=circle.y
                         #self.queue.put({'x': circle.x, 'y':circle.y, 'radius': circle.radius, 'image': img})
 
-            self.queue.put({'x': lastx, 'y':lasty, 'cam': cam})
+            self.queue.put({'x': lastx, 'y':lasty}) #, 'seg': segmented})
 
 
             #img.show()
@@ -55,7 +55,7 @@ class Consumer(Thread):
             obj=self.queue.get()
             try:
                 img1.drawCircle((obj['x'], obj['y']), 20,SimpleCV.Color.RED,3)
-                print obj['x']
+                #print obj['x']
             finally:
                 pass
             try:
