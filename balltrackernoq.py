@@ -21,7 +21,7 @@ class Producer(Thread):
         img1 = SimpleCV.Image("background.jpg")
         layer = img1.dl()
         while True:
-            #display.isNotDone():
+            #dislay.isNotDone():
             layer.clear()
             img =  cam.getImage().flipHorizontal()
             dist = img.colorDistance(SimpleCV.Color.BLACK).dilate(2)
